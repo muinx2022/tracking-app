@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tracking test — {{ project.name }}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+    nav a { margin-right: 1rem; }
+    code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <p><a href="{% url 'user_project_detail' project.pk %}">← Back to project</a></p>
+  <h1>Tracking test</h1>
+  <p>Project: <strong>{{ project.name }}</strong></p>
+  <p>This page loads <code>tracker.js</code> from this server. Open the project dashboard and refresh after clicking links below.</p>
+  <nav>
+    <a href="{% url 'user_track_test' project.pk %}?n=1">Simulated page A</a>
+    <a href="{% url 'user_track_test' project.pk %}?n=2">Simulated page B</a>
+    <a href="{% url 'user_track_test' project.pk %}?n=3">Simulated page C</a>
+  </nav>
+  <p id="loc"></p>
+  <script>
+    document.getElementById("loc").textContent = "Current URL: " + location.href;
+  </script>
+  <script async src="{{ request.scheme }}://{{ request.get_host }}{% static 'tracker.js' %}" data-tracking-id="{{ project.tracking_id }}"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-md rounded-2xl border border-slate-800/80 bg-gradient-to-br from-slate-900/90 to-slate-950/60 p-8 shadow-card">
+  <h1 class="mb-6 text-xl font-semibold tracking-tight text-white">Log in</h1>
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="rounded-lg border border-red-800/80 bg-red-950/40 px-3 py-2 text-sm text-red-200">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+    <div>
+      <label class="mb-1 block text-sm text-slate-400" for="id_username">Username</label>
+      <input type="text" name="username" id="id_username" required autofocus
+        class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 shadow-inner focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
+    </div>
+    <div>
+      <label class="mb-1 block text-sm text-slate-400" for="id_password">Password</label>
+      <input type="password" name="password" id="id_password" required
+        class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 shadow-inner focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
+    </div>
+    <button type="submit" class="w-full rounded-lg bg-indigo-600 py-2.5 font-medium text-white shadow-lg shadow-indigo-900/30 transition hover:bg-indigo-500">Sign in</button>
+  </form>
+</div>
+{% endblock %}

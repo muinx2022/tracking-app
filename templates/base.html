@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Tracking{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+          },
+          colors: {
+            accent: {
+              DEFAULT: "#6366f1",
+              muted: "#818cf8",
+              dim: "#312e81",
+            },
+          },
+          boxShadow: {
+            card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 4px 24px -4px rgba(0,0,0,0.35)",
+          },
+          borderRadius: {
+            xl: "0.75rem",
+            "2xl": "1rem",
+          },
+        },
+      },
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+  <style>
+    .htmx-indicator {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+    }
+    .htmx-indicator.htmx-request {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body class="min-h-full bg-slate-950 font-sans text-slate-100 antialiased">
+  <header class="border-b border-slate-800/80 bg-slate-900/90 shadow-card backdrop-blur-md">
+    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
+      <a href="{% url 'user_dashboard' %}" class="group flex items-center gap-2 text-lg font-semibold tracking-tight text-white">
+        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/40 ring-1 ring-white/10">
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+          </svg>
+        </span>
+        <span>Tracking</span>
+      </a>
+      <nav class="flex items-center gap-4 text-sm text-slate-300">
+        {% if user.is_authenticated %}
+          <span class="hidden items-center gap-2 sm:inline-flex">
+            <svg class="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+            </svg>
+            {{ user.username }}
+          </span>
+          <form action="{% url 'user_logout' %}" method="post" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="rounded-lg border border-slate-600/80 bg-slate-800/50 px-3 py-1.5 text-slate-200 transition hover:border-slate-500 hover:bg-slate-800">Log out</button>
+          </form>
+        {% else %}
+          <a href="{% url 'user_login' %}" class="rounded-lg bg-indigo-600 px-3 py-1.5 font-medium text-white shadow-lg shadow-indigo-900/30 transition hover:bg-indigo-500">Log in</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  <main class="mx-auto max-w-6xl px-4 py-8">
+    {% if messages %}
+      <ul class="mb-6 space-y-2">
+        {% for message in messages %}
+          <li class="rounded-lg border border-emerald-800/80 bg-emerald-950/50 px-4 py-2 text-sm text-emerald-200 shadow-card">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

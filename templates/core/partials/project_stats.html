@@ -1,0 +1,211 @@
+{% load humanize %}
+<div class="space-y-8">
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {% include "core/partials/kpi_card.html" with label="Pageviews" value=pageviews|intcomma delta_pct=pageviews_delta_pct inverse=False only %}
+    {% include "core/partials/kpi_card.html" with label="Unique visitors" value=unique_visitors|intcomma delta_pct=unique_visitors_delta_pct inverse=False only %}
+    {% include "core/partials/kpi_card.html" with label="Sessions" value=total_sessions|intcomma delta_pct=total_sessions_delta_pct inverse=False only %}
+    {% include "core/partials/kpi_card.html" with label="Bounce rate" value=bounce_rate|floatformat:1|add:"%" bounce_delta_pts=bounce_delta_pts inverse=True only %}
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
+    <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Traffic</h3>
+      <div class="relative h-56 w-full min-w-0 overflow-hidden">
+        <canvas id="trafficChart"></canvas>
+      </div>
+    </div>
+    <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Device</h3>
+      <div class="relative mx-auto h-56 w-full max-w-xs min-w-0 overflow-hidden">
+        <canvas id="deviceChart"></canvas>
+      </div>
+    </div>
+    <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">OS</h3>
+      <div class="relative h-56 w-full min-w-0 overflow-hidden">
+        <canvas id="osChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+    <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Browsers</h3>
+      <div class="relative mx-auto h-56 w-full max-w-sm min-w-0 overflow-hidden">
+        <canvas id="browserChart"></canvas>
+      </div>
+    </div>
+    <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Top referrers</h3>
+      {% if top_referrers %}
+        <ul class="divide-y divide-slate-800">
+          {% for row in top_referrers %}
+            <li class="flex justify-between gap-4 py-2 text-sm">
+              <span class="truncate text-slate-300" title="{{ row.ref_key }}">{{ row.ref_key|truncatechars:64 }}</span>
+              <span class="shrink-0 tabular-nums text-slate-500">{{ row.views|intcomma }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500">No referrer data in this range.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+    <h3 class="mb-3 text-sm font-medium text-slate-300">Top pages</h3>
+    {% if top_pages %}
+      <ul class="divide-y divide-slate-800">
+        {% for row in top_pages %}
+          <li class="flex justify-between gap-4 py-2 text-sm">
+            <span class="truncate text-slate-300" title="{{ row.url }}">{{ row.url|truncatechars:80 }}</span>
+            <span class="shrink-0 tabular-nums text-slate-500">{{ row.views|intcomma }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-sm text-slate-500">No pageviews in this range.</p>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+(function () {
+  if (typeof Chart === "undefined") return;
+
+  function destroyOld() {
+    if (window.__dashboardCharts && window.__dashboardCharts.length) {
+      window.__dashboardCharts.forEach(function (c) {
+        try { c.destroy(); } catch (e) {}
+      });
+    }
+    window.__dashboardCharts = [];
+  }
+
+  destroyOld();
+
+  var traffic = {{ traffic_chart|safe }};
+  var device = {{ device_chart|safe }};
+  var os = {{ os_chart|safe }};
+  var browser = {{ browser_chart|safe }};
+
+  var common = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: { color: "#94a3b8", boxWidth: 10 },
+        position: "bottom",
+      },
+    },
+  };
+
+  var tctx = document.getElementById("trafficChart");
+  if (tctx) {
+    window.__dashboardCharts.push(new Chart(tctx, {
+      type: "line",
+      data: {
+        labels: traffic.labels,
+        datasets: [{
+          label: "Pageviews",
+          data: traffic.values,
+          borderColor: "#818cf8",
+          backgroundColor: "rgba(129, 140, 248, 0.15)",
+          fill: true,
+          tension: 0.25,
+        }],
+      },
+      options: Object.assign({}, common, {
+        scales: {
+          x: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" } },
+          y: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" }, beginAtZero: true },
+        },
+      }),
+    }));
+  }
+
+  var dctx = document.getElementById("deviceChart");
+  if (dctx && device.labels.length) {
+    window.__dashboardCharts.push(new Chart(dctx, {
+      type: "doughnut",
+      data: {
+        labels: device.labels,
+        datasets: [{
+          data: device.values,
+          backgroundColor: ["#6366f1", "#22c55e", "#f59e0b", "#94a3b8"],
+        }],
+      },
+      options: Object.assign({}, common, {
+        cutout: "58%",
+        plugins: {
+          legend: {
+            labels: { color: "#94a3b8", boxWidth: 10 },
+            position: "bottom",
+          },
+        },
+      }),
+    }));
+  }
+
+  var octx = document.getElementById("osChart");
+  if (octx && os.labels.length) {
+    var osLabels = os.labels.map(function (s) {
+      s = String(s);
+      return s.length > 28 ? s.slice(0, 26) + "…" : s;
+    });
+    window.__dashboardCharts.push(new Chart(octx, {
+      type: "bar",
+      data: {
+        labels: osLabels,
+        datasets: [{
+          label: "Views",
+          data: os.values,
+          backgroundColor: "rgba(99, 102, 241, 0.6)",
+          borderRadius: 4,
+          maxBarThickness: 22,
+        }],
+      },
+      options: Object.assign({}, common, {
+        indexAxis: "y",
+        plugins: {
+          legend: { display: false },
+        },
+        scales: {
+          x: {
+            ticks: { color: "#64748b", maxTicksLimit: 6 },
+            grid: { color: "#1e293b" },
+            beginAtZero: true,
+          },
+          y: {
+            ticks: { color: "#94a3b8", autoSkip: false, font: { size: 11 } },
+            grid: { display: false },
+          },
+        },
+      }),
+    }));
+  }
+
+  var bctx = document.getElementById("browserChart");
+  if (bctx && browser.labels.length) {
+    window.__dashboardCharts.push(new Chart(bctx, {
+      type: "doughnut",
+      data: {
+        labels: browser.labels,
+        datasets: [{
+          data: browser.values,
+          backgroundColor: ["#6366f1", "#a855f7", "#22c55e", "#f59e0b", "#38bdf8", "#94a3b8"],
+        }],
+      },
+      options: Object.assign({}, common, {
+        cutout: "58%",
+        plugins: {
+          legend: {
+            labels: { color: "#94a3b8", boxWidth: 10 },
+            position: "bottom",
+          },
+        },
+      }),
+    }));
+  }
+})();
+</script>
