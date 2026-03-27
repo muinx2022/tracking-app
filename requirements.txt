@@ -4,3 +4,4 @@ django-cors-headers>=4.9
 user-agents>=2.2
 python-dotenv>=1.0
 gunicorn>=23.0
+whitenoise>=6.9
