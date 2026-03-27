@@ -11,12 +11,17 @@ class Command(BaseCommand):
         "trekky": {
             "password": "trekky123",
             "projects": ["Trekky", "Trekky Local"],
-            "create_missing_project": None,
+            "create_missing_projects": [
+                {"name": "Trekky", "domain": "trekky.net"},
+                {"name": "Trekky Local", "domain": "web.trekky-strapi.localhost"},
+            ],
         },
         "gikky": {
             "password": "gikky123",
             "projects": ["Gikky"],
-            "create_missing_project": {"name": "Gikky", "domain": "gikky.net"},
+            "create_missing_projects": [
+                {"name": "Gikky", "domain": "gikky.net"},
+            ],
         },
     }
 
@@ -41,8 +46,7 @@ class Command(BaseCommand):
                     f'Updated password for existing user "{username}".'
                 )
 
-            create_spec = spec.get("create_missing_project")
-            if create_spec:
+            for create_spec in spec.get("create_missing_projects", []):
                 Project.objects.get_or_create(
                     name=create_spec["name"],
                     defaults={"owner": user, "domain": create_spec["domain"]},
