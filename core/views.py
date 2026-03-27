@@ -1,6 +1,8 @@
 import json
+import csv
 from datetime import timedelta
 
+from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect
@@ -10,7 +12,7 @@ from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
 
 from analytics.models import Event
-from analytics.stats import kpi_comparison, period_bounds, project_stats
+from analytics.stats import FILTER_ALL, kpi_comparison, period_bounds, project_stats
 from core.forms import ProjectForm
 from core.models import Project
 
@@ -110,9 +112,16 @@ class ProjectDetailView(LoginRequiredMixin, TemplateView):
         period = self.request.GET.get("period", "7d")
         if period not in ("7d", "30d", "today"):
             period = "7d"
+        filters = {
+            "source": self.request.GET.get("source", FILTER_ALL),
+            "page_type": self.request.GET.get("page_type", FILTER_ALL),
+            "category": self.request.GET.get("category", FILTER_ALL),
+            "device": self.request.GET.get("device", FILTER_ALL),
+            "include_bots": self.request.GET.get("include_bots") == "1",
+        }
         start, end = period_bounds(period)
-        stats = project_stats(project, start, end)
-        kpi = kpi_comparison(project, period)
+        stats = project_stats(project, start, end, filters=filters)
+        kpi = kpi_comparison(project, period, filters=filters)
 
         traffic_labels = []
         traffic_values = []
@@ -129,17 +138,34 @@ class ProjectDetailView(LoginRequiredMixin, TemplateView):
 
         browser_labels = [r["visitor__browser"] or "unknown" for r in stats["browser_breakdown"]]
         browser_values = [r["count"] for r in stats["browser_breakdown"]]
+        country_labels = [r["visitor__country_name"] or "Unknown" for r in stats["country_breakdown"]]
+        country_values = [r["count"] for r in stats["country_breakdown"]]
 
         ctx.update(
             {
                 "project": project,
                 "period": period,
+                "filters": filters,
                 "pageviews": stats["pageviews"],
                 "unique_visitors": stats["unique_visitors"],
                 "total_sessions": stats["total_sessions"],
+                "returning_visitors": stats["returning_visitors"],
                 "bounce_rate": stats["bounce_rate"],
+                "avg_engaged_seconds": stats["avg_engaged_seconds"],
+                "bot_views": stats["bot_views"],
                 "top_pages": stats["top_pages"],
                 "top_referrers": stats["top_referrers"],
+                "landing_pages": stats["landing_pages"],
+                "traffic_by_source": stats["traffic_by_source"],
+                "top_campaigns": stats["top_campaigns"],
+                "top_content": stats["top_content"],
+                "scroll_completion": stats["scroll_completion"],
+                "exit_pages": stats["exit_pages"],
+                "internal_clicks": stats["internal_clicks"],
+                "conversion_report": stats["conversion_report"],
+                "realtime_views_30m": stats["realtime_views_30m"],
+                "realtime_active_visitors_30m": stats["realtime_active_visitors_30m"],
+                "available_filters": stats["available_filters"],
                 "traffic_chart": json.dumps(
                     {"labels": traffic_labels, "values": traffic_values}
                 ),
@@ -150,10 +176,43 @@ class ProjectDetailView(LoginRequiredMixin, TemplateView):
                 "browser_chart": json.dumps(
                     {"labels": browser_labels, "values": browser_values}
                 ),
+                "country_chart": json.dumps(
+                    {"labels": country_labels, "values": country_values}
+                ),
                 **kpi,
             }
         )
         return ctx
+
+
+class ProjectExportView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        project = get_object_or_404(Project.objects.filter(owner=request.user), pk=kwargs["pk"])
+        period = request.GET.get("period", "7d")
+        if period not in ("7d", "30d", "today"):
+            period = "7d"
+        filters = {
+            "source": request.GET.get("source", FILTER_ALL),
+            "page_type": request.GET.get("page_type", FILTER_ALL),
+            "category": request.GET.get("category", FILTER_ALL),
+            "device": request.GET.get("device", FILTER_ALL),
+            "include_bots": request.GET.get("include_bots") == "1",
+        }
+        start, end = period_bounds(period)
+        stats = project_stats(project, start, end, filters=filters)
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f'attachment; filename="project-{project.pk}-top-content.csv"'
+        writer = csv.writer(response)
+        writer.writerow(["content_title", "content_slug", "category", "views", "unique_visitors"])
+        for row in stats["top_content"]:
+            writer.writerow([
+                row.get("content_title", ""),
+                row.get("content_slug", ""),
+                row.get("category", ""),
+                row.get("views", 0),
+                row.get("unique_visitors", 0),
+            ])
+        return response
 
 
 class TrackTestView(LoginRequiredMixin, TemplateView):

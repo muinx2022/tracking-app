@@ -4,15 +4,23 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Tracking test — {{ project.name }}</title>
+  <meta name="trekky:page_type" content="article">
+  <meta name="trekky:content_id" content="demo-article-1">
+  <meta name="trekky:content_slug" content="tracking-demo-article">
+  <meta name="trekky:content_title" content="Tracking Demo Article">
+  <meta name="trekky:author" content="Tracking QA">
+  <meta name="trekky:category" content="Demo">
+  <meta name="trekky:tags" content="demo,tracking,qa">
+  <title>Tracking test - {{ project.name }}</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
     nav a { margin-right: 1rem; }
     code { background: #f1f5f9; padding: 0.1rem 0.35rem; border-radius: 4px; }
+    button { margin-top: 1rem; }
   </style>
 </head>
 <body>
-  <p><a href="{% url 'user_project_detail' project.pk %}">← Back to project</a></p>
+  <p><a href="{% url 'user_project_detail' project.pk %}">&larr; Back to project</a></p>
   <h1>Tracking test</h1>
   <p>Project: <strong>{{ project.name }}</strong></p>
   <p>This page loads <code>tracker.js</code> from this server. Open the project dashboard and refresh after clicking links below.</p>
@@ -20,10 +28,17 @@
     <a href="{% url 'user_track_test' project.pk %}?n=1">Simulated page A</a>
     <a href="{% url 'user_track_test' project.pk %}?n=2">Simulated page B</a>
     <a href="{% url 'user_track_test' project.pk %}?n=3">Simulated page C</a>
+    <a href="#signup" data-track-cta="signup_cta">Tracked CTA</a>
   </nav>
   <p id="loc"></p>
+  <button type="button" id="custom-event-btn">Send custom event</button>
   <script>
     document.getElementById("loc").textContent = "Current URL: " + location.href;
+    document.getElementById("custom-event-btn").addEventListener("click", function () {
+      if (window.TrekkyTrack) {
+        window.TrekkyTrack.track("signup", { placement: "track_test", variant: "primary" });
+      }
+    });
   </script>
   <script async src="{{ request.scheme }}://{{ request.get_host }}{% static 'tracker.js' %}" data-tracking-id="{{ project.tracking_id }}"></script>
 </body>

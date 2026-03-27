@@ -6,6 +6,7 @@ from core.views import (
     ProjectCreateView,
     ProjectDeleteView,
     ProjectDetailView,
+    ProjectExportView,
     ProjectUpdateView,
     TrackTestView,
 )
@@ -24,6 +25,7 @@ urlpatterns = [
         name="user_project_delete",
     ),
     path("user/projects/<int:pk>/", ProjectDetailView.as_view(), name="user_project_detail"),
+    path("user/projects/<int:pk>/export/", ProjectExportView.as_view(), name="user_project_export"),
     path("user/track-test/<int:pk>/", TrackTestView.as_view(), name="user_track_test"),
     path("dashboard/", RedirectView.as_view(pattern_name="user_dashboard", permanent=False)),
     path(
@@ -41,6 +43,10 @@ urlpatterns = [
     path(
         "projects/<int:pk>/",
         RedirectView.as_view(pattern_name="user_project_detail", permanent=False),
+    ),
+    path(
+        "projects/<int:pk>/export/",
+        RedirectView.as_view(pattern_name="user_project_export", permanent=False),
     ),
     path(
         "track-test/<int:pk>/",

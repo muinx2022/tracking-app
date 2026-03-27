@@ -1,39 +1,184 @@
 {% load humanize %}
 <div class="space-y-8">
-  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
     {% include "core/partials/kpi_card.html" with label="Pageviews" value=pageviews|intcomma delta_pct=pageviews_delta_pct inverse=False only %}
     {% include "core/partials/kpi_card.html" with label="Unique visitors" value=unique_visitors|intcomma delta_pct=unique_visitors_delta_pct inverse=False only %}
     {% include "core/partials/kpi_card.html" with label="Sessions" value=total_sessions|intcomma delta_pct=total_sessions_delta_pct inverse=False only %}
+    {% include "core/partials/kpi_card.html" with label="Returning visitors" value=returning_visitors|intcomma delta_pct=returning_visitors_delta_pct inverse=False only %}
+    {% include "core/partials/kpi_card.html" with label="Avg engaged seconds" value=avg_engaged_seconds delta_pct=avg_engaged_seconds_delta_pct inverse=False only %}
     {% include "core/partials/kpi_card.html" with label="Bounce rate" value=bounce_rate|floatformat:1|add:"%" bounce_delta_pts=bounce_delta_pts inverse=True only %}
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-3">
+    <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <div class="text-sm text-slate-400">Realtime 30m pageviews</div>
+      <div class="mt-2 text-3xl font-semibold text-white">{{ realtime_views_30m|intcomma }}</div>
+    </div>
+    <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <div class="text-sm text-slate-400">Realtime 30m active visitors</div>
+      <div class="mt-2 text-3xl font-semibold text-white">{{ realtime_active_visitors_30m|intcomma }}</div>
+    </div>
+    <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <div class="text-sm text-slate-400">Bot pageviews in range</div>
+      <div class="mt-2 text-3xl font-semibold text-white">{{ bot_views|intcomma }}</div>
+    </div>
   </div>
 
   <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
     <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
       <h3 class="mb-3 text-sm font-medium text-slate-300">Traffic</h3>
-      <div class="relative h-56 w-full min-w-0 overflow-hidden">
-        <canvas id="trafficChart"></canvas>
-      </div>
+      <div class="relative h-56 w-full min-w-0 overflow-hidden"><canvas id="trafficChart"></canvas></div>
     </div>
     <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
       <h3 class="mb-3 text-sm font-medium text-slate-300">Device</h3>
-      <div class="relative mx-auto h-56 w-full max-w-xs min-w-0 overflow-hidden">
-        <canvas id="deviceChart"></canvas>
-      </div>
+      <div class="relative mx-auto h-56 w-full max-w-xs min-w-0 overflow-hidden"><canvas id="deviceChart"></canvas></div>
     </div>
     <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
-      <h3 class="mb-3 text-sm font-medium text-slate-300">OS</h3>
-      <div class="relative h-56 w-full min-w-0 overflow-hidden">
-        <canvas id="osChart"></canvas>
-      </div>
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Countries</h3>
+      <div class="relative h-56 w-full min-w-0 overflow-hidden"><canvas id="countryChart"></canvas></div>
     </div>
   </div>
 
   <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
     <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Top content</h3>
+      {% if top_content %}
+        <ul class="divide-y divide-slate-800">
+          {% for row in top_content %}
+            <li class="flex justify-between gap-4 py-2 text-sm">
+              <span class="truncate text-slate-300" title="{{ row.content_title }}">{{ row.content_title|truncatechars:72 }}</span>
+              <span class="shrink-0 tabular-nums text-slate-500">{{ row.views|intcomma }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500">No tracked content metadata yet.</p>
+      {% endif %}
+    </div>
+    <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Traffic by source</h3>
+      {% if traffic_by_source %}
+        <ul class="divide-y divide-slate-800">
+          {% for row in traffic_by_source %}
+            <li class="flex justify-between gap-4 py-2 text-sm">
+              <span class="truncate text-slate-300">{{ row.source_group }}{% if row.source_name %} · {{ row.source_name }}{% endif %}</span>
+              <span class="shrink-0 tabular-nums text-slate-500">{{ row.views|intcomma }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500">No source data in this range.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+    <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Landing pages</h3>
+      {% if landing_pages %}
+        <ul class="divide-y divide-slate-800">
+          {% for row in landing_pages %}
+            <li class="flex justify-between gap-4 py-2 text-sm">
+              <span class="truncate text-slate-300" title="{{ row.landing_url }}">{{ row.landing_url|truncatechars:80 }}</span>
+              <span class="shrink-0 tabular-nums text-slate-500">{{ row.sessions|intcomma }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500">No landing page data.</p>
+      {% endif %}
+    </div>
+    <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Top campaigns</h3>
+      {% if top_campaigns %}
+        <ul class="divide-y divide-slate-800">
+          {% for row in top_campaigns %}
+            <li class="flex justify-between gap-4 py-2 text-sm">
+              <span class="truncate text-slate-300">{{ row.campaign }}</span>
+              <span class="shrink-0 tabular-nums text-slate-500">{{ row.views|intcomma }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500">No campaign traffic yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+    <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Scroll completion</h3>
+      {% if scroll_completion %}
+        <ul class="divide-y divide-slate-800">
+          {% for row in scroll_completion %}
+            <li class="flex justify-between gap-4 py-2 text-sm">
+              <span class="truncate text-slate-300" title="{{ row.url }}">{{ row.url|truncatechars:72 }}</span>
+              <span class="shrink-0 tabular-nums text-slate-500">{{ row.max_scroll }}%</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500">No scroll events yet.</p>
+      {% endif %}
+    </div>
+    <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Exit pages</h3>
+      {% if exit_pages %}
+        <ul class="divide-y divide-slate-800">
+          {% for row in exit_pages %}
+            <li class="flex justify-between gap-4 py-2 text-sm">
+              <span class="truncate text-slate-300" title="{{ row.url }}">{{ row.url|truncatechars:72 }}</span>
+              <span class="shrink-0 tabular-nums text-slate-500">{{ row.exits|intcomma }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500">No exit events yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+    <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Internal / CTA clicks</h3>
+      {% if internal_clicks %}
+        <ul class="divide-y divide-slate-800">
+          {% for row in internal_clicks %}
+            <li class="flex justify-between gap-4 py-2 text-sm">
+              <span class="truncate text-slate-300" title="{{ row.destination_url }}">{{ row.destination_url|truncatechars:72 }}</span>
+              <span class="shrink-0 tabular-nums text-slate-500">{{ row.clicks|intcomma }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500">No CTA click events yet.</p>
+      {% endif %}
+    </div>
+    <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">Conversion report</h3>
+      {% if conversion_report %}
+        <ul class="divide-y divide-slate-800">
+          {% for row in conversion_report %}
+            <li class="flex justify-between gap-4 py-2 text-sm">
+              <span class="truncate text-slate-300">{{ row.event_name|default:"custom" }} · {{ row.source_group|default:"Unknown" }}</span>
+              <span class="shrink-0 tabular-nums text-slate-500">{{ row.conversions|intcomma }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-sm text-slate-500">No conversion events yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
+    <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
+      <h3 class="mb-3 text-sm font-medium text-slate-300">OS</h3>
+      <div class="relative h-56 w-full min-w-0 overflow-hidden"><canvas id="osChart"></canvas></div>
+    </div>
+    <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
       <h3 class="mb-3 text-sm font-medium text-slate-300">Browsers</h3>
-      <div class="relative mx-auto h-56 w-full max-w-sm min-w-0 overflow-hidden">
-        <canvas id="browserChart"></canvas>
-      </div>
+      <div class="relative mx-auto h-56 w-full max-w-sm min-w-0 overflow-hidden"><canvas id="browserChart"></canvas></div>
     </div>
     <div class="min-w-0 rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
       <h3 class="mb-3 text-sm font-medium text-slate-300">Top referrers</h3>
@@ -51,161 +196,64 @@
       {% endif %}
     </div>
   </div>
-
-  <div class="rounded-xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card">
-    <h3 class="mb-3 text-sm font-medium text-slate-300">Top pages</h3>
-    {% if top_pages %}
-      <ul class="divide-y divide-slate-800">
-        {% for row in top_pages %}
-          <li class="flex justify-between gap-4 py-2 text-sm">
-            <span class="truncate text-slate-300" title="{{ row.url }}">{{ row.url|truncatechars:80 }}</span>
-            <span class="shrink-0 tabular-nums text-slate-500">{{ row.views|intcomma }}</span>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-sm text-slate-500">No pageviews in this range.</p>
-    {% endif %}
-  </div>
 </div>
 
 <script>
 (function () {
   if (typeof Chart === "undefined") return;
-
   function destroyOld() {
     if (window.__dashboardCharts && window.__dashboardCharts.length) {
-      window.__dashboardCharts.forEach(function (c) {
-        try { c.destroy(); } catch (e) {}
-      });
+      window.__dashboardCharts.forEach(function (c) { try { c.destroy(); } catch (e) {} });
     }
     window.__dashboardCharts = [];
   }
-
+  function registerChart(el, config) {
+    if (!el) return;
+    window.__dashboardCharts.push(new Chart(el, config));
+  }
   destroyOld();
-
   var traffic = {{ traffic_chart|safe }};
   var device = {{ device_chart|safe }};
   var os = {{ os_chart|safe }};
   var browser = {{ browser_chart|safe }};
-
+  var country = {{ country_chart|safe }};
   var common = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        labels: { color: "#94a3b8", boxWidth: 10 },
-        position: "bottom",
-      },
-    },
+    plugins: { legend: { labels: { color: "#94a3b8", boxWidth: 10 }, position: "bottom" } },
   };
-
-  var tctx = document.getElementById("trafficChart");
-  if (tctx) {
-    window.__dashboardCharts.push(new Chart(tctx, {
-      type: "line",
-      data: {
-        labels: traffic.labels,
-        datasets: [{
-          label: "Pageviews",
-          data: traffic.values,
-          borderColor: "#818cf8",
-          backgroundColor: "rgba(129, 140, 248, 0.15)",
-          fill: true,
-          tension: 0.25,
-        }],
-      },
-      options: Object.assign({}, common, {
-        scales: {
-          x: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" } },
-          y: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" }, beginAtZero: true },
-        },
-      }),
-    }));
-  }
-
-  var dctx = document.getElementById("deviceChart");
-  if (dctx && device.labels.length) {
-    window.__dashboardCharts.push(new Chart(dctx, {
+  registerChart(document.getElementById("trafficChart"), {
+    type: "line",
+    data: { labels: traffic.labels, datasets: [{ label: "Pageviews", data: traffic.values, borderColor: "#818cf8", backgroundColor: "rgba(129,140,248,0.15)", fill: true, tension: 0.25 }] },
+    options: Object.assign({}, common, { scales: { x: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" } }, y: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" }, beginAtZero: true } } })
+  });
+  if (device.labels.length) {
+    registerChart(document.getElementById("deviceChart"), {
       type: "doughnut",
-      data: {
-        labels: device.labels,
-        datasets: [{
-          data: device.values,
-          backgroundColor: ["#6366f1", "#22c55e", "#f59e0b", "#94a3b8"],
-        }],
-      },
-      options: Object.assign({}, common, {
-        cutout: "58%",
-        plugins: {
-          legend: {
-            labels: { color: "#94a3b8", boxWidth: 10 },
-            position: "bottom",
-          },
-        },
-      }),
-    }));
-  }
-
-  var octx = document.getElementById("osChart");
-  if (octx && os.labels.length) {
-    var osLabels = os.labels.map(function (s) {
-      s = String(s);
-      return s.length > 28 ? s.slice(0, 26) + "…" : s;
+      data: { labels: device.labels, datasets: [{ data: device.values, backgroundColor: ["#6366f1", "#22c55e", "#f59e0b", "#94a3b8"] }] },
+      options: Object.assign({}, common, { cutout: "58%" })
     });
-    window.__dashboardCharts.push(new Chart(octx, {
-      type: "bar",
-      data: {
-        labels: osLabels,
-        datasets: [{
-          label: "Views",
-          data: os.values,
-          backgroundColor: "rgba(99, 102, 241, 0.6)",
-          borderRadius: 4,
-          maxBarThickness: 22,
-        }],
-      },
-      options: Object.assign({}, common, {
-        indexAxis: "y",
-        plugins: {
-          legend: { display: false },
-        },
-        scales: {
-          x: {
-            ticks: { color: "#64748b", maxTicksLimit: 6 },
-            grid: { color: "#1e293b" },
-            beginAtZero: true,
-          },
-          y: {
-            ticks: { color: "#94a3b8", autoSkip: false, font: { size: 11 } },
-            grid: { display: false },
-          },
-        },
-      }),
-    }));
   }
-
-  var bctx = document.getElementById("browserChart");
-  if (bctx && browser.labels.length) {
-    window.__dashboardCharts.push(new Chart(bctx, {
+  if (country.labels.length) {
+    registerChart(document.getElementById("countryChart"), {
+      type: "bar",
+      data: { labels: country.labels, datasets: [{ label: "Views", data: country.values, backgroundColor: "rgba(56,189,248,0.7)", borderRadius: 4 }] },
+      options: Object.assign({}, common, { plugins: { legend: { display: false } }, scales: { x: { ticks: { color: "#94a3b8" }, grid: { display: false } }, y: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" }, beginAtZero: true } } })
+    });
+  }
+  if (os.labels.length) {
+    registerChart(document.getElementById("osChart"), {
+      type: "bar",
+      data: { labels: os.labels, datasets: [{ label: "Views", data: os.values, backgroundColor: "rgba(99,102,241,0.6)", borderRadius: 4, maxBarThickness: 22 }] },
+      options: Object.assign({}, common, { indexAxis: "y", plugins: { legend: { display: false } }, scales: { x: { ticks: { color: "#64748b" }, grid: { color: "#1e293b" }, beginAtZero: true }, y: { ticks: { color: "#94a3b8", autoSkip: false, font: { size: 11 } }, grid: { display: false } } } })
+    });
+  }
+  if (browser.labels.length) {
+    registerChart(document.getElementById("browserChart"), {
       type: "doughnut",
-      data: {
-        labels: browser.labels,
-        datasets: [{
-          data: browser.values,
-          backgroundColor: ["#6366f1", "#a855f7", "#22c55e", "#f59e0b", "#38bdf8", "#94a3b8"],
-        }],
-      },
-      options: Object.assign({}, common, {
-        cutout: "58%",
-        plugins: {
-          legend: {
-            labels: { color: "#94a3b8", boxWidth: 10 },
-            position: "bottom",
-          },
-        },
-      }),
-    }));
+      data: { labels: browser.labels, datasets: [{ data: browser.values, backgroundColor: ["#6366f1", "#a855f7", "#22c55e", "#f59e0b", "#38bdf8", "#94a3b8"] }] },
+      options: Object.assign({}, common, { cutout: "58%" })
+    });
   }
 })();
 </script>
