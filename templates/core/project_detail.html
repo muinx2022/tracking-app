@@ -24,9 +24,12 @@
   <a href="{% url 'user_project_export' project.pk %}?period={{ period }}&source={{ filters.source }}&page_type={{ filters.page_type }}&category={{ filters.category }}&device={{ filters.device }}{% if filters.include_bots %}&include_bots=1{% endif %}" class="inline-flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-950/30 px-4 py-2 text-sm font-medium text-emerald-200 shadow-card transition hover:bg-emerald-950/60">
     Export top content CSV
   </a>
+  <button type="button" id="embed-toggle-btn" aria-expanded="false" aria-controls="embed-card" class="inline-flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800">
+    Show embed script
+  </button>
 </div>
 
-<div class="mb-8 rounded-2xl border border-slate-800/80 bg-gradient-to-br from-slate-900/80 to-slate-950/60 p-6 shadow-card">
+<div id="embed-card" class="mb-8 hidden rounded-2xl border border-slate-800/80 bg-gradient-to-br from-slate-900/80 to-slate-950/60 p-6 shadow-card">
   <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
       <h2 class="text-sm font-medium text-slate-200">Embed on your site</h2>
@@ -105,9 +108,19 @@
 
 <script>
 (function () {
+  var toggleBtn = document.getElementById("embed-toggle-btn");
+  var card = document.getElementById("embed-card");
   var btn = document.getElementById("embed-copy-btn");
   var label = document.getElementById("embed-copy-label");
   var snippet = document.getElementById("embed-snippet");
+  if (toggleBtn && card) {
+    toggleBtn.addEventListener("click", function () {
+      var isHidden = card.classList.contains("hidden");
+      card.classList.toggle("hidden");
+      toggleBtn.setAttribute("aria-expanded", isHidden ? "true" : "false");
+      toggleBtn.textContent = isHidden ? "Hide embed script" : "Show embed script";
+    });
+  }
   if (!btn || !snippet) return;
   btn.addEventListener("click", function () {
     var text = snippet.textContent || "";
