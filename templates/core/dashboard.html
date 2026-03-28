@@ -4,10 +4,10 @@
 {% block content %}
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
   <div>
-    <h1 class="text-3xl font-semibold tracking-tight text-white">Projects</h1>
-    <p class="mt-1 text-sm text-slate-400">Create a project to get a tracking ID and embed script.</p>
+    <h1 class="text-main text-3xl font-semibold tracking-tight">Projects</h1>
+    <p class="text-muted-ui mt-1 text-sm">Create a project to get a tracking ID and embed script.</p>
   </div>
-  <a href="{% url 'user_project_create' %}" class="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-900/30 transition hover:bg-indigo-500">
+  <a href="{% url 'user_project_create' %}" class="btn-primary inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium">
     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
     New project
   </a>
@@ -16,46 +16,46 @@
 {% if projects %}
   <div class="grid gap-4 sm:grid-cols-2">
     {% for p in projects %}
-      <div class="group flex flex-col rounded-2xl border border-slate-800/80 bg-gradient-to-br from-slate-900/90 to-slate-950/60 p-5 shadow-card transition hover:border-slate-700 hover:shadow-lg">
+      <div class="surface-card group flex flex-col rounded-2xl border p-5 transition hover:shadow-lg">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
-              <h2 class="truncate text-lg font-semibold text-white group-hover:text-indigo-200">{{ p.name }}</h2>
+              <h2 class="text-main truncate text-lg font-semibold group-hover:text-accent">{{ p.name }}</h2>
               {% if p.is_active %}
-                <span class="shrink-0 rounded-full bg-emerald-950/80 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-emerald-400 ring-1 ring-emerald-800/60">Active</span>
+                <span class="badge-success shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">Active</span>
               {% endif %}
             </div>
             {% if p.domain %}
-              <p class="mt-1 truncate text-sm text-slate-400">{{ p.domain }}</p>
+              <p class="text-muted-ui mt-1 truncate text-sm">{{ p.domain }}</p>
             {% endif %}
-            <p class="mt-2 font-mono text-[11px] text-slate-500">{{ p.tracking_id }}</p>
+            <p class="text-faint mt-2 font-mono text-[11px]">{{ p.tracking_id }}</p>
           </div>
           <div class="flex shrink-0 items-center gap-2">
-            <a href="{% url 'user_project_update' p.pk %}" class="rounded-md border border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:bg-slate-800">Edit</a>
-            <a href="{% url 'user_project_delete' p.pk %}" class="rounded-md border border-rose-900/70 px-3 py-1.5 text-xs font-medium text-rose-300 transition hover:border-rose-700 hover:bg-rose-950/40">Delete</a>
+            <a href="{% url 'user_project_update' p.pk %}" class="btn-secondary rounded-md px-3 py-1.5 text-xs font-medium">Edit</a>
+            <a href="{% url 'user_project_delete' p.pk %}" class="btn-danger-soft rounded-md px-3 py-1.5 text-xs font-medium">Delete</a>
           </div>
         </div>
-        <a href="{% url 'user_project_detail' p.pk %}" class="mt-4 flex items-baseline justify-between border-t border-slate-800/80 pt-4">
+        <a href="{% url 'user_project_detail' p.pk %}" class="divider-soft mt-4 flex items-baseline justify-between border-t pt-4">
           <div>
-            <p class="text-[10px] font-medium uppercase tracking-wider text-slate-500">Pageviews (7d)</p>
-            <p class="mt-0.5 text-2xl font-semibold tabular-nums text-white">{{ p.pageviews_7d|intcomma }}</p>
+            <p class="text-faint text-[10px] font-medium uppercase tracking-wider">Pageviews (7d)</p>
+            <p class="text-main mt-0.5 text-2xl font-semibold tabular-nums">{{ p.pageviews_7d|intcomma }}</p>
           </div>
-          <span class="inline-flex items-center gap-2 text-xs text-slate-500 transition group-hover:text-indigo-300">
+          <span class="text-faint group-hover:text-accent inline-flex items-center gap-2 text-xs transition">
             View analytics
-            <svg class="h-4 w-4 shrink-0 text-slate-600 transition group-hover:translate-x-0.5 group-hover:text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            <svg class="text-faint group-hover:text-accent h-4 w-4 shrink-0 transition group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
           </span>
         </a>
       </div>
     {% endfor %}
   </div>
 {% else %}
-  <div class="rounded-2xl border border-dashed border-slate-700 bg-slate-900/40 px-8 py-16 text-center shadow-card">
-    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-800/80 ring-1 ring-slate-700/80">
-      <svg class="h-7 w-7 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"/></svg>
+  <div class="surface-panel border-soft rounded-2xl border border-dashed px-8 py-16 text-center">
+    <div class="surface-muted border-soft mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border">
+      <svg class="text-faint h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"/></svg>
     </div>
-    <p class="text-lg font-medium text-slate-300">No projects yet</p>
-    <p class="mt-2 max-w-md mx-auto text-sm text-slate-500">Create a project to receive a tracking ID, embed the script on your site, and see traffic in the dashboard.</p>
-    <a href="{% url 'user_project_create' %}" class="mt-6 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-900/30 transition hover:bg-indigo-500">Create your first project</a>
+    <p class="text-soft text-lg font-medium">No projects yet</p>
+    <p class="text-faint mt-2 mx-auto max-w-md text-sm">Create a project to receive a tracking ID, embed the script on your site, and see traffic in the dashboard.</p>
+    <a href="{% url 'user_project_create' %}" class="btn-primary mt-6 inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-medium">Create your first project</a>
   </div>
 {% endif %}
 {% endblock %}

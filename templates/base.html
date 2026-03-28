@@ -35,7 +35,191 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+  <script>
+    (function () {
+      var storedTheme = null;
+      try {
+        storedTheme = localStorage.getItem("tracking-theme");
+      } catch (e) {}
+      var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var theme = storedTheme || (prefersDark ? "dark" : "light");
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
   <style>
+    :root {
+      --bg: #f4f7fb;
+      --bg-accent: radial-gradient(circle at top, rgba(37, 99, 235, 0.08), transparent 36%), linear-gradient(180deg, #f8fbff 0%, #eef3f9 100%);
+      --header-bg: rgba(255, 255, 255, 0.88);
+      --surface: rgba(255, 255, 255, 0.82);
+      --surface-strong: rgba(255, 255, 255, 0.96);
+      --surface-muted: rgba(241, 245, 249, 0.92);
+      --surface-code: #e9eef6;
+      --border: rgba(148, 163, 184, 0.3);
+      --border-strong: rgba(100, 116, 139, 0.36);
+      --text: #0f172a;
+      --text-soft: #334155;
+      --text-muted: #64748b;
+      --text-faint: #94a3b8;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-soft-bg: rgba(37, 99, 235, 0.12);
+      --accent-soft-text: #1d4ed8;
+      --success-bg: rgba(22, 163, 74, 0.12);
+      --success-text: #15803d;
+      --danger-bg: rgba(225, 29, 72, 0.1);
+      --danger-text: #be123c;
+      --shadow-card: 0 14px 42px -24px rgba(15, 23, 42, 0.28);
+      --chart-grid: rgba(148, 163, 184, 0.24);
+      --chart-label: #475569;
+      --chart-tick: #64748b;
+    }
+    :root[data-theme="dark"] {
+      --bg: #020617;
+      --bg-accent: radial-gradient(circle at top, rgba(99, 102, 241, 0.16), transparent 34%), linear-gradient(180deg, #020617 0%, #0f172a 100%);
+      --header-bg: rgba(15, 23, 42, 0.88);
+      --surface: rgba(15, 23, 42, 0.84);
+      --surface-strong: rgba(15, 23, 42, 0.94);
+      --surface-muted: rgba(2, 6, 23, 0.84);
+      --surface-code: rgba(2, 6, 23, 0.86);
+      --border: rgba(51, 65, 85, 0.82);
+      --border-strong: rgba(71, 85, 105, 0.82);
+      --text: #f8fafc;
+      --text-soft: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+      --accent: #818cf8;
+      --accent-hover: #a5b4fc;
+      --accent-soft-bg: rgba(99, 102, 241, 0.18);
+      --accent-soft-text: #c7d2fe;
+      --success-bg: rgba(6, 78, 59, 0.55);
+      --success-text: #6ee7b7;
+      --danger-bg: rgba(76, 5, 25, 0.58);
+      --danger-text: #fda4af;
+      --shadow-card: 0 1px 0 0 rgba(255,255,255,0.04) inset, 0 4px 24px -4px rgba(0,0,0,0.35);
+      --chart-grid: rgba(30, 41, 59, 0.9);
+      --chart-label: #94a3b8;
+      --chart-tick: #64748b;
+    }
+    html, body {
+      background: var(--bg-accent);
+      color: var(--text);
+    }
+    body {
+      min-height: 100%;
+    }
+    .surface-header {
+      background: var(--header-bg);
+      border-color: var(--border);
+      box-shadow: var(--shadow-card);
+    }
+    .surface-card {
+      background: linear-gradient(180deg, var(--surface-strong) 0%, var(--surface) 100%);
+      border-color: var(--border);
+      box-shadow: var(--shadow-card);
+    }
+    .surface-panel {
+      background: var(--surface);
+      border-color: var(--border);
+      box-shadow: var(--shadow-card);
+    }
+    .surface-muted {
+      background: var(--surface-muted);
+      border-color: var(--border);
+      box-shadow: var(--shadow-card);
+    }
+    .surface-code {
+      background: var(--surface-code);
+      border-color: var(--border);
+    }
+    .text-main { color: var(--text); }
+    .text-soft { color: var(--text-soft); }
+    .text-muted-ui { color: var(--text-muted); }
+    .text-faint { color: var(--text-faint); }
+    .text-accent { color: var(--accent); }
+    .hover-text-accent:hover { color: var(--accent-hover); }
+    .border-soft { border-color: var(--border); }
+    .border-strong { border-color: var(--border-strong); }
+    .divider-soft { border-color: var(--border); }
+    .list-divider > * + * {
+      border-top: 1px solid var(--border);
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: var(--shadow-card);
+      transition: background-color 0.15s ease;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary {
+      background: var(--surface-muted);
+      border: 1px solid var(--border-strong);
+      color: var(--text-soft);
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+    .btn-secondary:hover {
+      background: var(--surface-strong);
+      border-color: var(--text-faint);
+    }
+    .btn-accent-soft {
+      background: var(--accent-soft-bg);
+      border: 1px solid color-mix(in srgb, var(--accent) 38%, transparent);
+      color: var(--accent-soft-text);
+      transition: background-color 0.15s ease;
+    }
+    .btn-accent-soft:hover {
+      background: color-mix(in srgb, var(--accent-soft-bg) 82%, transparent);
+    }
+    .btn-success-soft {
+      background: var(--success-bg);
+      border: 1px solid color-mix(in srgb, var(--success-text) 32%, transparent);
+      color: var(--success-text);
+      transition: background-color 0.15s ease;
+    }
+    .btn-success-soft:hover {
+      background: color-mix(in srgb, var(--success-bg) 82%, transparent);
+    }
+    .btn-danger-soft {
+      background: var(--danger-bg);
+      border: 1px solid color-mix(in srgb, var(--danger-text) 34%, transparent);
+      color: var(--danger-text);
+    }
+    .btn-danger {
+      background: #e11d48;
+      color: #fff;
+    }
+    .btn-danger:hover { background: #be123c; }
+    .badge-success {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid color-mix(in srgb, var(--success-text) 24%, transparent);
+    }
+    .message-success {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border-color: color-mix(in srgb, var(--success-text) 24%, transparent);
+    }
+    .message-error {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: color-mix(in srgb, var(--danger-text) 24%, transparent);
+    }
+    .input-themed {
+      width: 100%;
+      border: 1px solid var(--border-strong);
+      background: var(--surface-muted);
+      color: var(--text);
+    }
+    .input-themed::placeholder { color: var(--text-faint); }
+    .input-themed:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+    .code-inline {
+      background: var(--surface-code);
+      color: var(--text-soft);
+    }
     .htmx-indicator {
       opacity: 0;
       pointer-events: none;
@@ -47,31 +231,35 @@
     }
   </style>
 </head>
-<body class="min-h-full bg-slate-950 font-sans text-slate-100 antialiased">
-  <header class="border-b border-slate-800/80 bg-slate-900/90 shadow-card backdrop-blur-md">
+<body class="min-h-full font-sans antialiased">
+  <header class="surface-header border-b backdrop-blur-md">
     <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4">
-      <a href="{% url 'user_dashboard' %}" class="group flex items-center gap-2 text-lg font-semibold tracking-tight text-white">
-        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600/90 text-white shadow-lg shadow-indigo-900/40 ring-1 ring-white/10">
+      <a href="{% url 'user_dashboard' %}" class="group flex items-center gap-2 text-lg font-semibold tracking-tight text-main">
+        <span class="flex h-9 w-9 items-center justify-center rounded-lg text-white shadow-lg ring-1 ring-white/10" style="background: var(--accent);">
           <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
           </svg>
         </span>
         <span>Tracking</span>
       </a>
-      <nav class="flex items-center gap-4 text-sm text-slate-300">
+      <nav class="flex items-center gap-3 text-sm text-soft">
+        <button type="button" id="theme-toggle" class="btn-secondary inline-flex items-center gap-2 rounded-lg px-3 py-1.5">
+          <span id="theme-toggle-icon" aria-hidden="true">☀</span>
+          <span id="theme-toggle-label">Light</span>
+        </button>
         {% if user.is_authenticated %}
           <span class="hidden items-center gap-2 sm:inline-flex">
-            <svg class="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
+            <svg class="h-4 w-4 text-faint" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
             </svg>
             {{ user.username }}
           </span>
           <form action="{% url 'user_logout' %}" method="post" class="inline">
             {% csrf_token %}
-            <button type="submit" class="rounded-lg border border-slate-600/80 bg-slate-800/50 px-3 py-1.5 text-slate-200 transition hover:border-slate-500 hover:bg-slate-800">Log out</button>
+            <button type="submit" class="btn-secondary rounded-lg px-3 py-1.5">Log out</button>
           </form>
         {% else %}
-          <a href="{% url 'user_login' %}" class="rounded-lg bg-indigo-600 px-3 py-1.5 font-medium text-white shadow-lg shadow-indigo-900/30 transition hover:bg-indigo-500">Log in</a>
+          <a href="{% url 'user_login' %}" class="btn-primary rounded-lg px-3 py-1.5 font-medium">Log in</a>
         {% endif %}
       </nav>
     </div>
@@ -80,11 +268,35 @@
     {% if messages %}
       <ul class="mb-6 space-y-2">
         {% for message in messages %}
-          <li class="rounded-lg border border-emerald-800/80 bg-emerald-950/50 px-4 py-2 text-sm text-emerald-200 shadow-card">{{ message }}</li>
+          <li class="message-success rounded-lg border px-4 py-2 text-sm shadow-card">{{ message }}</li>
         {% endfor %}
       </ul>
     {% endif %}
     {% block content %}{% endblock %}
   </main>
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var button = document.getElementById("theme-toggle");
+      var label = document.getElementById("theme-toggle-label");
+      var icon = document.getElementById("theme-toggle-icon");
+      function updateButton() {
+        var theme = root.dataset.theme === "dark" ? "dark" : "light";
+        if (label) label.textContent = theme === "dark" ? "Dark" : "Light";
+        if (icon) icon.textContent = theme === "dark" ? "☾" : "☀";
+      }
+      updateButton();
+      if (!button) return;
+      button.addEventListener("click", function () {
+        var nextTheme = root.dataset.theme === "dark" ? "light" : "dark";
+        root.dataset.theme = nextTheme;
+        try {
+          localStorage.setItem("tracking-theme", nextTheme);
+        } catch (e) {}
+        updateButton();
+        document.dispatchEvent(new CustomEvent("tracking-theme-change", { detail: { theme: nextTheme } }));
+      });
+    })();
+  </script>
 </body>
 </html>

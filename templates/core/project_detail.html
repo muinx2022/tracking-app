@@ -4,101 +4,97 @@
 {% block content %}
 <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
   <div>
-    <a href="{% url 'user_dashboard' %}" class="inline-flex items-center gap-1 text-sm text-indigo-400 transition hover:text-indigo-300">
+    <a href="{% url 'user_dashboard' %}" class="text-accent hover-text-accent inline-flex items-center gap-1 text-sm transition">
       <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
       Projects
     </a>
-    <h1 class="mt-2 text-3xl font-semibold tracking-tight text-white">{{ project.name }}</h1>
+    <h1 class="text-main mt-2 text-3xl font-semibold tracking-tight">{{ project.name }}</h1>
     {% if project.domain %}
-      <p class="mt-1 text-sm text-slate-400">{{ project.domain }}</p>
+      <p class="text-muted-ui mt-1 text-sm">{{ project.domain }}</p>
     {% endif %}
-    <p class="mt-2 font-mono text-xs text-slate-500">Tracking ID: {{ project.tracking_id }}</p>
+    <p class="text-faint mt-2 font-mono text-xs">Tracking ID: {{ project.tracking_id }}</p>
   </div>
 </div>
 
 <div class="mb-6 flex flex-wrap gap-3">
-  <a href="{% url 'user_track_test' project.pk %}" class="inline-flex items-center gap-2 rounded-lg border border-indigo-500/50 bg-indigo-950/40 px-4 py-2 text-sm font-medium text-indigo-200 shadow-card transition hover:bg-indigo-950/70">
+  <a href="{% url 'user_track_test' project.pk %}" class="btn-accent-soft inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium">
     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
     Open tracking test page
   </a>
-  <a href="{% url 'user_project_export' project.pk %}?period={{ period }}&source={{ filters.source }}&page_type={{ filters.page_type }}&category={{ filters.category }}&device={{ filters.device }}{% if filters.include_bots %}&include_bots=1{% endif %}" class="inline-flex items-center gap-2 rounded-lg border border-emerald-500/40 bg-emerald-950/30 px-4 py-2 text-sm font-medium text-emerald-200 shadow-card transition hover:bg-emerald-950/60">
+  <a href="{% url 'user_project_export' project.pk %}?period={{ period }}&source={{ filters.source }}&page_type={{ filters.page_type }}&category={{ filters.category }}&device={{ filters.device }}{% if filters.include_bots %}&include_bots=1{% endif %}" class="btn-success-soft inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium">
     Export top content CSV
   </a>
-  <button type="button" id="embed-toggle-btn" aria-expanded="false" aria-controls="embed-card" class="inline-flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-800/80 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800">
+  <button type="button" id="embed-toggle-btn" aria-expanded="false" aria-controls="embed-card" class="btn-secondary inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium">
     Show embed script
   </button>
 </div>
 
-<div id="embed-card" class="mb-8 hidden rounded-2xl border border-slate-800/80 bg-gradient-to-br from-slate-900/80 to-slate-950/60 p-6 shadow-card">
+<div id="embed-card" class="surface-card mb-8 hidden rounded-2xl border p-6">
   <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
-      <h2 class="text-sm font-medium text-slate-200">Embed on your site</h2>
-      <p class="mt-1 text-sm text-slate-500">Place this snippet before <code class="rounded bg-slate-800/80 px-1 py-0.5 font-mono text-xs text-slate-400">&lt;/body&gt;</code> on every page you want to track.</p>
+      <h2 class="text-soft text-sm font-medium">Embed on your site</h2>
+      <p class="text-faint mt-1 text-sm">Place this snippet before <code class="code-inline rounded px-1 py-0.5 font-mono text-xs">&lt;/body&gt;</code> on every page you want to track.</p>
     </div>
-    <button type="button" id="embed-copy-btn" class="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-600 bg-slate-800/80 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:bg-slate-800">
-      <svg class="h-4 w-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/></svg>
+    <button type="button" id="embed-copy-btn" class="btn-secondary inline-flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium">
+      <svg class="text-faint h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"/></svg>
       <span id="embed-copy-label">Copy snippet</span>
     </button>
   </div>
-  <pre id="embed-snippet" class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/80 p-4 text-xs leading-relaxed text-slate-300"><code>&lt;script async src="{{ request.scheme }}://{{ request.get_host }}{% static 'tracker.js' %}" data-tracking-id="{{ project.tracking_id }}"&gt;&lt;/script&gt;</code></pre>
+  <pre id="embed-snippet" class="surface-code text-soft overflow-x-auto rounded-xl border p-4 text-xs leading-relaxed"><code>&lt;script async src="{{ request.scheme }}://{{ request.get_host }}{% static 'tracker.js' %}" data-tracking-id="{{ project.tracking_id }}"&gt;&lt;/script&gt;</code></pre>
 </div>
 
 <form
-  class="mb-6 grid gap-3 rounded-2xl border border-slate-800/80 bg-slate-900/40 p-4 shadow-card md:grid-cols-6"
+  class="surface-panel mb-6 grid gap-3 rounded-2xl border p-4 md:grid-cols-6"
   hx-get="{% url 'user_project_detail' project.pk %}"
   hx-target="#stats-panel"
   hx-trigger="change from:select, change from:input"
   hx-swap="innerHTML"
   hx-indicator="#stats-loading"
 >
-  <label for="id_period" class="text-sm font-medium text-slate-400">Period</label>
-  <select
-    name="period"
-    id="id_period"
-    class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100 shadow-card focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-  >
+  <label for="id_period" class="text-muted-ui text-sm font-medium">Period</label>
+  <select name="period" id="id_period" class="input-themed rounded-lg px-3 py-2 text-sm">
     <option value="today" {% if period == "today" %}selected{% endif %}>Today</option>
     <option value="7d" {% if period == "7d" %}selected{% endif %}>Last 7 days</option>
     <option value="30d" {% if period == "30d" %}selected{% endif %}>Last 30 days</option>
   </select>
-  <select name="source" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100">
+  <select name="source" class="input-themed rounded-lg px-3 py-2 text-sm">
     <option value="__all__">All sources</option>
     {% for value in available_filters.sources %}
       <option value="{{ value }}" {% if filters.source == value %}selected{% endif %}>{{ value }}</option>
     {% endfor %}
   </select>
-  <select name="page_type" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100">
+  <select name="page_type" class="input-themed rounded-lg px-3 py-2 text-sm">
     <option value="__all__">All page types</option>
     {% for value in available_filters.page_types %}
       <option value="{{ value }}" {% if filters.page_type == value %}selected{% endif %}>{{ value }}</option>
     {% endfor %}
   </select>
-  <select name="category" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100">
+  <select name="category" class="input-themed rounded-lg px-3 py-2 text-sm">
     <option value="__all__">All categories</option>
     {% for value in available_filters.categories %}
       <option value="{{ value }}" {% if filters.category == value %}selected{% endif %}>{{ value }}</option>
     {% endfor %}
   </select>
-  <select name="device" class="rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-100">
+  <select name="device" class="input-themed rounded-lg px-3 py-2 text-sm">
     <option value="__all__">All devices</option>
     {% for value in available_filters.devices %}
       <option value="{{ value }}" {% if filters.device == value %}selected{% endif %}>{{ value }}</option>
     {% endfor %}
   </select>
-  <label class="inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-200">
+  <label class="input-themed inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm">
     <input type="checkbox" name="include_bots" value="1" {% if filters.include_bots %}checked{% endif %}>
     Include bots
   </label>
 </form>
 
 <div class="relative min-h-[320px]">
-  <div id="stats-loading" class="htmx-indicator absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-slate-950/40 backdrop-blur-[2px]">
-    <div class="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/90 px-4 py-3 shadow-card">
-      <svg class="h-6 w-6 animate-spin text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+  <div id="stats-loading" class="htmx-indicator absolute inset-0 z-10 flex items-center justify-center rounded-2xl backdrop-blur-[2px]" style="background: color-mix(in srgb, var(--bg) 52%, transparent);">
+    <div class="surface-panel flex items-center gap-3 rounded-xl border px-4 py-3">
+      <svg class="h-6 w-6 animate-spin text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      <span class="text-sm text-slate-300">Updating stats…</span>
+      <span class="text-soft text-sm">Updating stats...</span>
     </div>
   </div>
   <div id="stats-panel">
@@ -113,6 +109,7 @@
   var btn = document.getElementById("embed-copy-btn");
   var label = document.getElementById("embed-copy-label");
   var snippet = document.getElementById("embed-snippet");
+
   if (toggleBtn && card) {
     toggleBtn.addEventListener("click", function () {
       var isHidden = card.classList.contains("hidden");
@@ -121,18 +118,20 @@
       toggleBtn.textContent = isHidden ? "Hide embed script" : "Show embed script";
     });
   }
+
   if (!btn || !snippet) return;
+
   btn.addEventListener("click", function () {
     var text = snippet.textContent || "";
-    if (!navigator.clipboard || !navigator.clipboard.writeText) {
-      return;
-    }
+    if (!navigator.clipboard || !navigator.clipboard.writeText) return;
     navigator.clipboard.writeText(text).then(function () {
       if (label) label.textContent = "Copied!";
-      btn.classList.add("border-emerald-600/50", "bg-emerald-950/40", "text-emerald-200");
+      btn.classList.remove("btn-secondary");
+      btn.classList.add("btn-success-soft");
       setTimeout(function () {
         if (label) label.textContent = "Copy snippet";
-        btn.classList.remove("border-emerald-600/50", "bg-emerald-950/40", "text-emerald-200");
+        btn.classList.remove("btn-success-soft");
+        btn.classList.add("btn-secondary");
       }, 2000);
     });
   });

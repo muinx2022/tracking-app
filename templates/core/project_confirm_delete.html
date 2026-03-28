@@ -2,15 +2,15 @@
 {% block title %}Delete project{% endblock %}
 {% block content %}
 <div class="mx-auto max-w-lg">
-  <div class="rounded-xl border border-rose-900/60 bg-slate-900/40 p-6">
-    <h1 class="mb-3 text-2xl font-semibold text-white">Delete project</h1>
-    <p class="text-sm text-slate-400">
-      Delete <span class="font-medium text-slate-200">{{ object.name }}</span> and all related tracking data. This action cannot be undone.
+  <div class="surface-panel rounded-xl border p-6">
+    <h1 class="text-main mb-3 text-2xl font-semibold">Delete project</h1>
+    <p class="text-muted-ui text-sm">
+      Delete <span class="text-soft font-medium">{{ object.name }}</span> and all related tracking data. This action cannot be undone.
     </p>
     <form method="post" class="mt-6 flex gap-3">
       {% csrf_token %}
-      <button type="submit" class="rounded-md bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-500">Delete</button>
-      <a href="{% url 'user_dashboard' %}" class="rounded-md border border-slate-600 px-4 py-2 text-sm text-slate-300 hover:bg-slate-800">Cancel</a>
+      <button type="submit" class="btn-danger rounded-md px-4 py-2 text-sm font-medium">Delete</button>
+      <a href="{% url 'user_dashboard' %}" class="btn-secondary rounded-md px-4 py-2 text-sm">Cancel</a>
     </form>
   </div>
 </div>
